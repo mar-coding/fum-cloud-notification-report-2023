@@ -3,7 +3,8 @@ FROM golang:1.17-alpine AS BuildStage
 ENV GOPROXY=https://goproxy.io,direct 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+# COPY go.mod go.sum ./
+COPY go.mod ./
 RUN go mod download
 
 COPY . .
