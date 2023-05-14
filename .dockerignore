@@ -1,0 +1,25 @@
+# Exclude build artifacts
+bin/
+obj/
+
+# Exclude vendor directories
+vendor/
+
+# Exclude IDE-specific files
+.vscode/
+.idea/
+
+# Exclude test files
+**/*_test.go
+
+# Exclude generated files
+**/*_gen.go
+**/*_string.go
+
+# Exclude documentation files
+**/*.md
+
+# Exclude miscellaneous files
+*.log
+*.tmp
+*.bak
