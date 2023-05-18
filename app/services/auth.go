@@ -3,7 +3,7 @@ package services
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/mar-coding/fum-cloud-notification-report-2023/app/models"
@@ -31,7 +31,7 @@ func ValidateToken(signedToken string) (err error) {
 	var result models.Response
 
 	// response body is []byte
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 
 	// Parse []byte to go struct pointer
 	if err := json.Unmarshal(body, &result); err != nil {
