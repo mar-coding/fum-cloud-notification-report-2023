@@ -9,10 +9,6 @@ import (
 	"github.com/mar-coding/fum-cloud-notification-report-2023/app/services"
 )
 
-type tokenInput struct {
-	Authorization string `json:"Authorization" binding:"required"`
-}
-
 func Auth() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenString := context.GetHeader("Authorization")
@@ -37,7 +33,7 @@ func HandleAllMailRequests(context *gin.Context, sqlDB *sql.DB) {
 	//
 
 	results := services.GetMailRequests(2, sqlDB)
-	if results == nil || len(results) == 0 {
+	if len(results) == 0 {
 		context.JSON(404, gin.H{"error": "not found"})
 	} else {
 		context.JSON(http.StatusOK, results)
@@ -51,7 +47,7 @@ func HandleMailRequestByID(context *gin.Context, sqlDB *sql.DB) {
 
 	requestID := context.Param("requestId")
 	results := services.GetMailItemsByRequest(requestID, 2, sqlDB)
-	if results == nil || len(results) == 0 {
+	if len(results) == 0 {
 		context.JSON(404, gin.H{"error": "not found"})
 	} else {
 		context.JSON(http.StatusOK, results)
@@ -70,7 +66,7 @@ func HandleMailRequestByConfigID(context *gin.Context, sqlDB *sql.DB) {
 		return
 	}
 	results := services.GetMailItemsByMailConfigId(temp, 2, sqlDB)
-	if results == nil || len(results) == 0 {
+	if len(results) == 0 {
 		context.JSON(404, gin.H{"error": "not found"})
 	} else {
 		context.JSON(http.StatusOK, results)
