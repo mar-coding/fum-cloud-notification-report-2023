@@ -1,11 +1,47 @@
 package main
 
-import "fmt"
+import (
+	"database/sql"
+	"net/http"
 
-func sayHello(name string) string {
-	return fmt.Sprintf("Hello %s", name)
-}
+	"github.com/gin-gonic/gin"
+	"github.com/mar-coding/fum-cloud-notification-report-2023/app/db"
+	"github.com/mar-coding/fum-cloud-notification-report-2023/app/middleware"
+)
 
 func main() {
-	// fmt.Println(sayHello("Bob"))
+	sqlDB, err := db.Connect()
+	if err != nil {
+		panic(err)
+	}
+	defer sqlDB.Close()
+	router := initRouter(sqlDB)
+	router.Run(":8081")
+}
+
+func initRouter(sqlDB *sql.DB) *gin.Engine {
+	router := gin.Default()
+	api := router.Group("/reports")
+	{
+		secured := api.Group("/mail").Use(middleware.Auth())
+		{
+			secured.GET("", func(c *gin.Context) {
+				middleware.HandleAllMailRequests(c, sqlDB)
+			})
+			secured.GET("/:requestId", func(c *gin.Context) {
+				middleware.HandleMailRequestByID(c, sqlDB)
+			})
+			secured.GET("/configs/:configId", func(c *gin.Context) {
+				middleware.HandleMailRequestByConfigID(c, sqlDB)
+			})
+		}
+	}
+
+	router.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Not found",
+		})
+	})
+
+	return router
 }
