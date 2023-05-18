@@ -9,6 +9,9 @@ import (
 
 func GetMailRequests(id int, sqlDB *sql.DB) []models.OutputEmail {
 	rows, err := db.DbGetMailRequests(id, sqlDB)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	var results []models.OutputEmail
@@ -29,6 +32,9 @@ func GetMailRequests(id int, sqlDB *sql.DB) []models.OutputEmail {
 
 func GetMailItemsByRequest(uid string, id int, sqlDB *sql.DB) []models.OutputReq {
 	rows, err := db.DbGetMailItemsByRequest(uid, id, sqlDB)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	var results []models.OutputReq
@@ -50,6 +56,9 @@ func GetMailItemsByRequest(uid string, id int, sqlDB *sql.DB) []models.OutputReq
 
 func GetMailItemsByMailConfigId(confId int, id int, sqlDB *sql.DB) []models.OutputReq {
 	rows, err := db.DbGetMailItemsByMailConfigId(confId, id, sqlDB)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	var results []models.OutputReq
