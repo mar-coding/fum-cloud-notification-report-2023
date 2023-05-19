@@ -32,6 +32,9 @@ func ValidateToken(signedToken string) (int, error) {
 
 	// response body is []byte
 	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return 0, err
+	}
 
 	// Parse []byte to go struct pointer
 	if err := json.Unmarshal(body, &result); err != nil {
