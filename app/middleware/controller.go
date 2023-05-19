@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -17,14 +18,36 @@ func Auth() gin.HandlerFunc {
 			context.Abort()
 			return
 		}
-		err := services.ValidateToken(tokenString)
+		id, err := services.ValidateToken(tokenString)
 		if err != nil {
 			context.JSON(401, gin.H{"error": err.Error()})
 			context.Abort()
 			return
 		}
+		// Set the 'id' in the Gin context for future use
+		context.Set("id", id)
 		context.Next()
 	}
+}
+
+func getId(ctx *gin.Context) int {
+	id, exists := ctx.Get("id")
+	if !exists {
+		// Handle the case when 'id' is not found in the context
+		ctx.JSON(500, gin.H{"error": "id not found in context"})
+		return 0
+	}
+
+	// Convert the 'id' to string type
+	strId := fmt.Sprintf("%v", id)
+
+	intID, err := strconv.Atoi(strId)
+	if err != nil {
+		// Handle the error when the 'id' cannot be converted to an integer
+		ctx.JSON(500, gin.H{"error": "failed to convert id to integer"})
+		return 0
+	}
+	return intID
 }
 
 func HandleAllMailRequests(context *gin.Context, sqlDB *sql.DB) {
@@ -32,7 +55,8 @@ func HandleAllMailRequests(context *gin.Context, sqlDB *sql.DB) {
 	// for route: /reports/mail
 	//
 
-	results := services.GetMailRequests(2, sqlDB)
+	tempId := getId(context)
+	results := services.GetMailRequests(tempId, sqlDB)
 	if len(results) == 0 {
 		context.JSON(404, gin.H{"error": "not found"})
 	} else {
@@ -46,7 +70,8 @@ func HandleMailRequestByID(context *gin.Context, sqlDB *sql.DB) {
 	//
 
 	requestID := context.Param("requestId")
-	results := services.GetMailItemsByRequest(requestID, 2, sqlDB)
+	tempId := getId(context)
+	results := services.GetMailItemsByRequest(requestID, tempId, sqlDB)
 	if len(results) == 0 {
 		context.JSON(404, gin.H{"error": "not found"})
 	} else {
@@ -65,7 +90,8 @@ func HandleMailRequestByConfigID(context *gin.Context, sqlDB *sql.DB) {
 	if err != nil {
 		return
 	}
-	results := services.GetMailItemsByMailConfigId(temp, 2, sqlDB)
+	tempId := getId(context)
+	results := services.GetMailItemsByMailConfigId(temp, tempId, sqlDB)
 	if len(results) == 0 {
 		context.JSON(404, gin.H{"error": "not found"})
 	} else {
