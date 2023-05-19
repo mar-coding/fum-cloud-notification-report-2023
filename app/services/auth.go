@@ -10,11 +10,11 @@ import (
 	"github.com/mar-coding/fum-cloud-notification-report-2023/app/utils"
 )
 
-func ValidateToken(signedToken string) (err error) {
+func ValidateToken(signedToken string) (int, error) {
 	client := http.Client{}
 	req, err := http.NewRequest("POST", "http://127.0.0.1:8082/user/validate", nil)
 	if err != nil {
-		return
+		return 0, err
 	}
 
 	req.Header = http.Header{
@@ -24,7 +24,7 @@ func ValidateToken(signedToken string) (err error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return
+		return 0, err
 	}
 
 	defer res.Body.Close()
@@ -35,13 +35,14 @@ func ValidateToken(signedToken string) (err error) {
 
 	// Parse []byte to go struct pointer
 	if err := json.Unmarshal(body, &result); err != nil {
-		return err
+		return 0, err
 	}
-	if result.Id == 0 {
-		return &utils.RequestError{
+	id := result.Id
+	if id == 0 {
+		return 0, &utils.RequestError{
 			StatusCode: 401,
 			Err:        errors.New("Unauthorized"),
 		}
 	}
-	return
+	return id, nil
 }
