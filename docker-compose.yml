@@ -1,0 +1,20 @@
+version: "3.8"
+# maintainer: MohammadAmin Rahimi <marcoding78@gmail.com>
+services:
+  app:
+    build: .
+    # image: amnrah/fum-cloud-notification-report-2023:cloud-v1.0.0
+    container_name: reportApp
+    restart: always
+    ports:
+      - "1234:1234"
+    networks:
+      - core_net
+      - shared_net
+
+networks:
+  core_net:
+    name: fum-cloud-notification-core-2023_core_net
+    external: true
+  shared_net:
+    external: true

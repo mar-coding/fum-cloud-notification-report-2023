@@ -1,10 +1,10 @@
-FROM golang:1.17-alpine AS BuildStage 
+FROM golang:1.20.4-alpine3.18 AS BuildStage 
 
 ENV GOPROXY=https://goproxy.io,direct 
 WORKDIR /app
 
 # COPY go.mod go.sum ./
-COPY go.mod ./
+COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
@@ -15,12 +15,12 @@ EXPOSE 1234
 
 # Deploy stage
 
-FROM alpine:3.14
+FROM alpine:3.18
 
 WORKDIR /app
 
 COPY --from=BuildStage /app/main .
-# COPY --from=BuildStage /app/envs /app/envs
+COPY --from=BuildStage /app/.env .
 
 EXPOSE 1234
 
