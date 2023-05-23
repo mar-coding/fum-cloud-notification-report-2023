@@ -16,7 +16,7 @@ func main() {
 	}
 	defer sqlDB.Close()
 	router := initRouter(sqlDB)
-	router.Run(":8081")
+	router.Run(":1234")
 }
 
 func initRouter(sqlDB *sql.DB) *gin.Engine {
