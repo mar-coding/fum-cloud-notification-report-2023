@@ -3,16 +3,26 @@ package services
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/mar-coding/fum-cloud-notification-report-2023/app/models"
 	"github.com/mar-coding/fum-cloud-notification-report-2023/app/utils"
 )
 
+func initAddress() string {
+	godotenv.Load("./.env")
+	var add string = os.Getenv("VALIDATE_USER_ADDRESS")
+	conf := fmt.Sprintf("%s/user/validate", add)
+	return conf
+}
+
 func ValidateToken(signedToken string) (int, error) {
 	client := http.Client{}
-	req, err := http.NewRequest("POST", "http://127.0.0.1:8082/user/validate", nil)
+	req, err := http.NewRequest("POST", initAddress(), nil)
 	if err != nil {
 		return 0, err
 	}
