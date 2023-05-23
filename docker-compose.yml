@@ -2,8 +2,8 @@ version: "3.8"
 # maintainer: MohammadAmin Rahimi <marcoding78@gmail.com>
 services:
   app:
-    build: .
-    # image: amnrah/fum-cloud-notification-report-2023:cloud-v1.0.0
+    # build: .
+    image: amnrah/fum-cloud-notification-report-2023:cloud-v1.0.0
     container_name: reportApp
     restart: always
     ports:
