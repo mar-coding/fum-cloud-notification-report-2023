@@ -23,3 +23,8 @@ vendor/
 *.log
 *.tmp
 *.bak
+
+#my details
+.github/workflows/
+/vendor/
+
