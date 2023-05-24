@@ -20,7 +20,7 @@ FROM alpine:3.18
 WORKDIR /app
 
 COPY --from=BuildStage /app/main .
-COPY --from=BuildStage /app/.env .
+# COPY --from=BuildStage /app/.env .
 
 EXPOSE 1234
 
