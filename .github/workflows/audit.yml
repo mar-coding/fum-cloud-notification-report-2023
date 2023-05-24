@@ -55,10 +55,7 @@ jobs:
       - name: Extract Version
         id: version_step
         run: |
-          echo "##[set-output name=version;]VERSION=${GITHUB_REF#refs/tags/v}"
-
-      - name: Set version as environment variable
-        run: echo "DOCKER_IMAGE_VERSION=${{ steps.version_step.outputs.version }}" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       # multiplatform image creation
       - name: Set up QEMU
@@ -82,5 +79,5 @@ jobs:
           tags: |
             amnrah/fum-cloud-notification-report-2023:${{ env.DOCKER_IMAGE_VERSION }}
             amnrah/fum-cloud-notification-report-2023:latest
-          build-args: |
-            VERSION=${{ steps.version_step.outputs.version }}
+        env:
+          DOCKER_IMAGE_VERSION: ${{ env.VERSION }}
