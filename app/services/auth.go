@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 
@@ -14,7 +15,11 @@ import (
 )
 
 func initAddress() string {
-	godotenv.Load("./.env")
+	err := godotenv.Load("./.env")
+
+	if err != nil {
+		log.Fatal("Failed to load the config")
+	}
 	var add string = os.Getenv("VALIDATE_USER_ADDRESS")
 	conf := fmt.Sprintf("%s/user/validate", add)
 	return conf

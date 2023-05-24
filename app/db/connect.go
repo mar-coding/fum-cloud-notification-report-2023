@@ -22,7 +22,10 @@ type DBConfig struct {
 }
 
 func Connect() (*sql.DB, error) {
-	godotenv.Load("./.env")
+	err := godotenv.Load("./.env")
+	if err != nil {
+		log.Fatal("Failed to load the config")
+	}
 	temp_port, _ := strconv.Atoi(os.Getenv("POSTGRES_PORT"))
 	config := DBConfig{
 		Host:     os.Getenv("POSTGRES_HOST"),

@@ -16,7 +16,10 @@ func main() {
 	}
 	defer sqlDB.Close()
 	router := initRouter(sqlDB)
-	router.Run(":1234")
+	err = router.Run(":1234")
+	if err != nil {
+		panic(err)
+	}
 }
 
 func initRouter(sqlDB *sql.DB) *gin.Engine {
