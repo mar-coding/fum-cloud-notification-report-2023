@@ -3,7 +3,7 @@ version: "3.8"
 services:
   app:
     # build: .
-    image: amnrah/fum-cloud-notification-report-2023:cloud-v1.0.0
+    image: amnrah/fum-cloud-notification-report-2023:latest
     container_name: reportApp
     restart: always
     ports:
