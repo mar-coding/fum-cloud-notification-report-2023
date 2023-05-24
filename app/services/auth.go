@@ -5,22 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/mar-coding/fum-cloud-notification-report-2023/app/config"
 	"github.com/mar-coding/fum-cloud-notification-report-2023/app/models"
 	"github.com/mar-coding/fum-cloud-notification-report-2023/app/utils"
 )
 
 func initAddress() string {
-	err := godotenv.Load("./.env")
-
-	if err != nil {
-		log.Fatal("Failed to load the config")
-	}
-	var add string = os.Getenv("VALIDATE_USER_ADDRESS")
+	config := config.LoadFromEnv()
+	var add string = config.ValidateUserAdd
 	conf := fmt.Sprintf("%s/user/validate", add)
 	return conf
 }
