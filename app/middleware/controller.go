@@ -4,9 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mar-coding/fum-cloud-notification-report-2023/app/config"
+	"github.com/mar-coding/fum-cloud-notification-report-2023/app/models"
 	"github.com/mar-coding/fum-cloud-notification-report-2023/app/services"
 )
 
@@ -47,6 +50,110 @@ func getId(ctx *gin.Context) int {
 	return intID
 }
 
+func getBaseURL(u *url.URL) string {
+	config := config.LoadFromEnv()
+	var base string = config.AppUrl
+
+	baseURL := &url.URL{
+		Scheme: u.Scheme,
+		Host:   u.Host,
+		Path:   u.Path,
+	}
+	fullURL := base + baseURL.String()
+	return fullURL
+}
+
+func createPageURL(baseURL string, page int, pageSize int) *url.URL {
+	u, _ := url.Parse(baseURL)
+	q := u.Query()
+	q.Set("page", strconv.Itoa(page))
+	q.Set("pageSize", strconv.Itoa(pageSize))
+	u.RawQuery = q.Encode()
+
+	return u
+}
+
+func checkUrl(totalItems int, pageSize int, pageNum int) bool {
+	totalPages := removeDecimal(float64(totalItems) / float64(pageSize))
+	if pageNum <= totalPages {
+		return true
+	}
+	return false
+}
+
+func createHATEOASLink(sqlDB *sql.DB, context *gin.Context, pageNum int, pageSize int) models.HATEOASLinks {
+	baseURL := getBaseURL(context.Request.URL)
+	selfURL := createPageURL(baseURL, pageNum, pageSize)
+	selfLink := selfURL.String()
+
+	links := models.HATEOASLinks{
+		Self: selfLink,
+	}
+
+	nextPageNum := pageNum + 1
+	nextPageURL := createPageURL(baseURL, nextPageNum, pageSize)
+	nextLink := nextPageURL.String()
+
+	totalItems := len(services.GetMailRequests(getId(context), sqlDB))
+	if checkUrl(totalItems, pageSize, nextPageNum) {
+		links.Next = nextLink
+	}
+
+	prevPageNum := pageNum - 1
+	prevPageURL := createPageURL(baseURL, prevPageNum, pageSize)
+	prevLink := prevPageURL.String()
+
+	if pageNum > 1 {
+		links.Prev = prevLink
+	}
+
+	return links
+}
+
+func removeDecimal(num float64) int {
+	if float64(int(num)) == num {
+		return int(num)
+	} else {
+		return int(num) + 1
+	}
+}
+
+func HATEOASOutputEmail(sqlDB *sql.DB, context *gin.Context, data []models.OutputEmail, pageNum int, pageSize int, totalItems int) models.PaginationResponseOutputEmail {
+	links := createHATEOASLink(sqlDB, context, pageNum, pageSize)
+	totalPages := removeDecimal(float64(totalItems) / float64(pageSize))
+
+	var response models.PaginationResponseOutputEmail
+	response = models.PaginationResponseOutputEmail{
+		Meta: models.HATEOASMetaData{
+			Page:       pageNum,
+			PageSize:   pageSize,
+			TotalPages: totalPages,
+			TotalItems: totalItems,
+			Links:      links,
+		},
+		Data: data,
+	}
+	return response
+}
+
+func HATEOASOutputReq(sqlDB *sql.DB, context *gin.Context, data []models.OutputReq, pageNum int, pageSize int, totalItems int) models.PaginationResponseOutputReq {
+	links := createHATEOASLink(sqlDB, context, pageNum, pageSize)
+	totalPages := removeDecimal(float64(totalItems) / float64(pageSize))
+
+	var response models.PaginationResponseOutputReq
+	response = models.PaginationResponseOutputReq{
+		Meta: models.HATEOASMetaData{
+			Page:       pageNum,
+			PageSize:   pageSize,
+			TotalPages: totalPages,
+			TotalItems: totalItems,
+			Links:      links,
+		},
+		Data: data,
+	}
+	return response
+}
+
 func HandleAllMailRequests(context *gin.Context, sqlDB *sql.DB) {
 	//
 	// for route: /reports/mail
@@ -56,6 +163,7 @@ func HandleAllMailRequests(context *gin.Context, sqlDB *sql.DB) {
 	var has_problem bool = false
 	pageNumber := context.Query("page")
 	pageSize := context.Query("pageSize")
+	totalItems := len(services.GetMailRequests(getId(context), sqlDB))
 
 	// Check if page number and page size are provided
 	if pageNumber == "" || pageSize == "" {
@@ -92,7 +200,8 @@ func HandleAllMailRequests(context *gin.Context, sqlDB *sql.DB) {
 				context.JSON(404, gin.H{"error": "not found"})
 			}
 		} else {
-			context.JSON(http.StatusOK, results)
+			response := HATEOASOutputEmail(sqlDB, context, results, pageNum, pageSz, totalItems)
+			context.JSON(http.StatusOK, response)
 		}
 	}
 
@@ -107,6 +216,7 @@ func HandleMailRequestByID(context *gin.Context, sqlDB *sql.DB) {
 	var has_problem bool = false
 	pageNumber := context.Query("page")
 	pageSize := context.Query("pageSize")
+	totalItems := len(services.GetMailRequests(getId(context), sqlDB))
 
 	if pageNumber == "" || pageSize == "" {
 		// Pagination metadata is not provided, return all items
@@ -144,7 +254,8 @@ func HandleMailRequestByID(context *gin.Context, sqlDB *sql.DB) {
 				context.JSON(404, gin.H{"error": "not found"})
 			}
 		} else {
-			context.JSON(http.StatusOK, results)
+			response := HATEOASOutputReq(sqlDB, context, results, pageNum, pageSz, totalItems)
+			context.JSON(http.StatusOK, response)
 		}
 	}
 }
@@ -158,6 +269,7 @@ func HandleMailRequestByConfigID(context *gin.Context, sqlDB *sql.DB) {
 	var has_problem bool = false
 	pageNumber := context.Query("page")
 	pageSize := context.Query("pageSize")
+	totalItems := len(services.GetMailRequests(getId(context), sqlDB))
 
 	if pageNumber == "" || pageSize == "" {
 		// Pagination metadata is not provided, return all items
@@ -203,7 +315,8 @@ func HandleMailRequestByConfigID(context *gin.Context, sqlDB *sql.DB) {
 				context.JSON(404, gin.H{"error": "not found"})
 			}
 		} else {
-			context.JSON(http.StatusOK, results)
+			response := HATEOASOutputReq(sqlDB, context, results, pageNum, pageSz, totalItems)
+			context.JSON(http.StatusOK, response)
 		}
 	}
 }

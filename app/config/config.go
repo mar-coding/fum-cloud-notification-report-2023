@@ -15,6 +15,7 @@ type DBConfig struct {
 	Password        string
 	DBName          string
 	ValidateUserAdd string
+	AppUrl          string
 }
 
 func LoadFromEnv() DBConfig {
@@ -28,6 +29,7 @@ func LoadFromEnv() DBConfig {
 			Password:        os.Getenv("POSTGRES_PASSWORD"),
 			DBName:          os.Getenv("POSTGRES_DB"),
 			ValidateUserAdd: os.Getenv("VALIDATE_USER_ADDRESS"),
+			AppUrl:          os.Getenv("APP_URL"),
 		}
 	} else {
 		err := godotenv.Load("./.env")
@@ -42,6 +44,7 @@ func LoadFromEnv() DBConfig {
 			Password:        os.Getenv("POSTGRES_PASSWORD"),
 			DBName:          os.Getenv("POSTGRES_DB"),
 			ValidateUserAdd: os.Getenv("VALIDATE_USER_ADDRESS"),
+			AppUrl:          os.Getenv("APP_URL"),
 		}
 	}
 	return config

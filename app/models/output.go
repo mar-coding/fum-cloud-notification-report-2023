@@ -15,3 +15,27 @@ type OutputReq struct {
 	Receiver            string `json:"receiver"`
 	MailConfigId        int    `json:"mail_config"`
 }
+
+type PaginationResponseOutputReq struct {
+	Meta HATEOASMetaData `json:"metadata"`
+	Data []OutputReq     `json:"data"`
+}
+
+type PaginationResponseOutputEmail struct {
+	Meta HATEOASMetaData `json:"metadata"`
+	Data []OutputEmail   `json:"data"`
+}
+
+type HATEOASMetaData struct {
+	Page       int          `json:"page"`
+	PageSize   int          `json:"pageSize"`
+	TotalPages int          `json:"totalPages"`
+	TotalItems int          `json:"totalItems"`
+	Links      HATEOASLinks `json:"_link"`
+}
+
+type HATEOASLinks struct {
+	Self string `json:"self"`
+	Next string `json:"next,omitempty"`
+	Prev string `json:"prev,omitempty"`
+}
