@@ -75,10 +75,7 @@ func createPageURL(baseURL string, page int, pageSize int) *url.URL {
 
 func checkUrl(totalItems int, pageSize int, pageNum int) bool {
 	totalPages := removeDecimal(float64(totalItems) / float64(pageSize))
-	if pageNum <= totalPages {
-		return true
-	}
-	return false
+	return pageNum <= totalPages
 }
 
 func createHATEOASLink(sqlDB *sql.DB, context *gin.Context, pageNum int, pageSize int) models.HATEOASLinks {
@@ -122,8 +119,7 @@ func HATEOASOutputEmail(sqlDB *sql.DB, context *gin.Context, data []models.Outpu
 	links := createHATEOASLink(sqlDB, context, pageNum, pageSize)
 	totalPages := removeDecimal(float64(totalItems) / float64(pageSize))
 
-	var response models.PaginationResponseOutputEmail
-	response = models.PaginationResponseOutputEmail{
+	response := models.PaginationResponseOutputEmail{
 		Meta: models.HATEOASMetaData{
 			Page:       pageNum,
 			PageSize:   pageSize,
@@ -140,8 +136,7 @@ func HATEOASOutputReq(sqlDB *sql.DB, context *gin.Context, data []models.OutputR
 	links := createHATEOASLink(sqlDB, context, pageNum, pageSize)
 	totalPages := removeDecimal(float64(totalItems) / float64(pageSize))
 
-	var response models.PaginationResponseOutputReq
-	response = models.PaginationResponseOutputReq{
+	response := models.PaginationResponseOutputReq{
 		Meta: models.HATEOASMetaData{
 			Page:       pageNum,
 			PageSize:   pageSize,
